@@ -30,7 +30,10 @@ const Navbar = () => {
               <Link to="/createpost" className="text-white hover:text-gray-300 transition">Publicar</Link>
             )}
 
-            <button onClick={logout} className="bg-black text-white px-3 py-1 rounded text-sm hover:bg-white hover:text-black transition">
+            <button
+              onClick={logout}
+              className="bg-black text-white px-3 py-1 rounded text-sm hover:bg-white hover:text-black transition"
+            >
               Cerrar Sesión
             </button>
           </>
@@ -50,23 +53,10 @@ const Navbar = () => {
             </span>
           )}
         </Link>
-
-        {/* Botones de prueba */}
-        <button
-          onClick={() => setUser({ id: 1, nombre: "Admin", email: "admin@test.com", rol: "admin" })}
-          className="bg-blue-500 px-2 py-1 rounded text-xs hover:bg-blue-700 transition"
-        >
-          Login Admin
-        </button>
-        <button
-          onClick={() => setUser({ id: 2, nombre: "Usuario", email: "user@test.com", rol: "user" })}
-          className="bg-green-500 px-2 py-1 rounded text-xs hover:bg-green-700 transition"
-        >
-          Login Usuario
-        </button>
       </div>
     </nav>
   );
 };
 
 export default Navbar;
+

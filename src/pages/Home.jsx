@@ -1,54 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext"; 
+import api from "../api"; 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 const Home = () => {
   const navigate = useNavigate(); 
   const { addToCart } = useCart(); 
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Datos de prueba
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      titulo: "Meme 1",
-      descripcion: "Descripción Meme 1",
-      precio: 19990,
-      imagen: "https://pbs.twimg.com/media/FWqJ4bTX0AAHTbW.jpg:large",
-    },
-    {
-      id: 2,
-      titulo: "Meme 2",
-      descripcion: "Descripción Meme 2",
-      precio: 24990,
-      imagen: "https://difusoribero.com/wp-content/uploads/2021/07/meme_famoso.png?w=779",
-    },
-    {
-      id: 3,
-      titulo: "Meme 3",
-      descripcion: "Descripción Meme 3",
-      precio: 17990,
-      imagen: "/img/meme3.jpg",
-    },
-    {
-      id: 4,
-      titulo: "Meme 4",
-      descripcion: "Descripción Meme 4",
-      precio: 22990,
-      imagen: "/img/meme4.jpg",
-    },
-  ]);
+  // Obtener productos desde el backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await api.get("/products");
+        setProducts(data);
+      } catch (error) {
+        setError("Error al cargar los productos");
+        console.error("Error al obtener productos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Redirigir a PostDetail con los datos del producto seleccionado
   const handleViewDetails = (product) => {
     navigate("/postdetail", { state: { product } });
   };
 
-  // Agregar producto al carrito con alerta
-  const handleAddToCart = (product) => {
-    addToCart(product); // ✅ Agregar al carrito
-    alert(`"${product.titulo}" ha sido agregado al carrito.`);
+  // Agregar producto al carrito con verificación de autenticación
+  const handleAddToCart = async (product) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Debes iniciar sesión para agregar productos al carrito.");
+        navigate("/login");
+        return;
+      }
+
+      await addToCart(product);
+      alert(`"${product.titulo}" ha sido agregado al carrito.`);
+    } catch (error) {
+      console.error("Error al agregar al carrito:", error);
+      alert("Error al agregar el producto al carrito.");
+    }
   };
 
   return (
@@ -65,8 +66,13 @@ const Home = () => {
         <div className="w-full max-w-6xl bg-black p-8 rounded-lg">
           <h2 className="text-3xl font-bold mb-6 text-center">Nuestros Productos</h2>
 
-          {/* VERIFICA SI HAY PRODUCTOS */}
-          {products.length > 0 ? (
+          {/* Mostrar error si falla la carga */}
+          {error && <p className="text-center text-red-500">{error}</p>}
+
+          {/* Mostrar mensaje de carga mientras se obtienen los productos */}
+          {loading ? (
+            <p className="text-center text-gray-400">Cargando productos...</p>
+          ) : products.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products.map((product) => (
                 <div key={product.id} className="bg-gray-900 p-4 rounded-lg shadow-lg">

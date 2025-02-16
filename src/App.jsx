@@ -11,9 +11,19 @@ import Gallery from "./pages/Gallery";
 import PostDetail from "./pages/PostDetail";
 import Cart from "./pages/Cart"; 
 
-const PrivateRoute = ({ element }) => {
+// Rutas privadas
+const PrivateRoute = ({ element, roles }) => {
   const { user } = useContext(AuthContext);
-  return user ? element : <Navigate to="/login" />;
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (roles && !roles.includes(user.rol)) {
+    return <Navigate to="/" />;
+  }
+
+  return element;
 };
 
 const App = () => {
@@ -25,10 +35,12 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<PrivateRoute element={<Profile />} />} /> 
-          <Route path="/createpost" element={<PrivateRoute element={<CreatePost />} />} /> 
-          <Route path="/gallery" element={<PrivateRoute element={<Gallery />} />} /> 
           <Route path="/postdetail" element={<PostDetail />} />
           <Route path="/cart" element={<Cart />} /> 
+
+          {/* Rutas exclusivas para administradores */}
+          <Route path="/createpost" element={<PrivateRoute element={<CreatePost />} roles={["admin"]} />} /> 
+          <Route path="/gallery" element={<PrivateRoute element={<Gallery />} roles={["admin"]} />} /> 
         </Routes>
       </Router>
     </CartProvider>

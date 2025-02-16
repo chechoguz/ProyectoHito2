@@ -1,26 +1,51 @@
-import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext"; 
+import api from "../api";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 const PostDetail = () => {
-  const location = useLocation();
-  const { product } = location.state || {};
+  const { id } = useParams(); // Obtener el ID del producto desde la URL
   const { addToCart } = useCart(); 
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!product) {
-    return (
-      <div className="text-center text-white">
-        <h2 className="text-2xl font-bold">Producto no encontrado</h2>
-      </div>
-    );
-  }
+  // Obtener datos del producto desde el backend
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const { data } = await api.get(`/products/${id}`);
+        setProduct(data);
+      } catch (error) {
+        setError("Error al cargar el producto.");
+        console.error("Error al obtener el producto:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
 
   // Manejar la acción de agregar al carrito
   const handleAddToCart = () => {
     addToCart(product); 
     alert(`"${product.titulo}" ha sido agregado al carrito.`);
   };
+
+  if (loading) {
+    return <p className="text-center text-white">Cargando producto...</p>;
+  }
+
+  if (error || !product) {
+    return (
+      <div className="text-center text-white">
+        <h2 className="text-2xl font-bold">Producto no encontrado</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-black min-h-screen w-screen flex flex-col text-white">
@@ -62,4 +87,3 @@ const PostDetail = () => {
 };
 
 export default PostDetail;
-

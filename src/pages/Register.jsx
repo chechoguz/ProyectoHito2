@@ -1,10 +1,23 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext"; 
 import Navbar from "../components/Navbar"; 
 import Footer from "../components/Footer"; 
 
 const Register = () => {
-  const [form, setForm] = useState({ nombre: "", apellido: "", email: "", password: "" });
+  const { register } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({ 
+    nombre: "", 
+    apellido: "", 
+    email: "", 
+    password: "", 
+    descripcion: "", 
+    imagen: "" 
+  });
+
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -20,11 +33,13 @@ const Register = () => {
       return;
     }
 
-    try {
-      // Aquí iría la petición a la API
+    const response = await register(form.nombre, form.apellido, form.email, form.password, form.descripcion, form.imagen);
+    
+    if (response.success) {
       alert("Usuario registrado con éxito");
-    } catch (err) {
-      setError("Hubo un error al registrarse.");
+      navigate("/login");
+    } else {
+      setError(response.message);
     }
   };
 
@@ -43,8 +58,9 @@ const Register = () => {
             <input type="text" name="apellido" placeholder="Apellido" onChange={handleChange} className="w-full p-3 bg-black text-white border-b border-gray-500 focus:outline-none" />
             <input type="email" name="email" placeholder="Email" onChange={handleChange} className="w-full p-3 bg-black text-white border-b border-gray-500 focus:outline-none" />
             <input type="password" name="password" placeholder="Contraseña" onChange={handleChange} className="w-full p-3 bg-black text-white border-b border-gray-500 focus:outline-none" />
+            <input type="text" name="descripcion" placeholder="Descripción (opcional)" onChange={handleChange} className="w-full p-3 bg-black text-white border-b border-gray-500 focus:outline-none" />
+            <input type="text" name="imagen" placeholder="URL de la imagen (opcional)" onChange={handleChange} className="w-full p-3 bg-black text-white border-b border-gray-500 focus:outline-none" />
 
-            
             <button type="submit" className="w-full py-3 border border-white text-black rounded-md hover:bg-black hover:text-white transition">
               Regístrate
             </button>
@@ -67,3 +83,4 @@ const Register = () => {
 };
 
 export default Register;
+

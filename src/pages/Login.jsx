@@ -1,9 +1,13 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext"; 
 import Navbar from "../components/Navbar"; 
 import Footer from "../components/Footer"; 
 
 const Login = () => {
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
@@ -20,11 +24,13 @@ const Login = () => {
       return;
     }
 
-    try {
-      // Aquí iría la petición a la API
+    const response = await login(form.email, form.password);
+    
+    if (response.success) {
       alert("Inicio de sesión exitoso");
-    } catch (err) {
-      setError("Hubo un error al iniciar sesión.");
+      navigate("/profile"); 
+    } else {
+      setError(response.message);
     }
   };
 
@@ -54,7 +60,6 @@ const Login = () => {
               className="w-full p-3 bg-black text-white border-b border-gray-500 focus:outline-none"
             />
 
-            
             <button
               type="submit"
               className="w-full py-3 border border-white text-black rounded-md hover:bg-black hover:text-white transition focus:outline-none focus:ring-0 focus:border-none"
